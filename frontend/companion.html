@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>DriverGuard • Mobile Phone Safety Receiver</title>
+  <meta name="description" content="Tier 4 Mobile Companion Receiver for Driver Drowsiness, Yawning & Fatigue Signals." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
+
+  <!-- Custom Companion Stylesheet -->
+  <link rel="stylesheet" href="/static/css/companion.css" />
+</head>
+<body>
+
+  <!-- Fullscreen Flashing Emergency Strobe -->
+  <div id="mobile-strobe" class="mobile-strobe-overlay"></div>
+
+  <!-- Header -->
+  <header class="companion-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button id="btn-header-back" class="btn-header-back" title="Return Back to Dashboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Back</span>
+      </button>
+      <div class="companion-brand">
+        <div style="font-size: 1.3rem;">🛡️</div>
+        <div>
+          <h2>DriverGuard Mobile</h2>
+          <span>Tier 4 Companion Receiver</span>
+        </div>
+      </div>
+    </div>
+    <div class="conn-pill">
+      <div id="conn-dot" class="conn-dot"></div>
+      <span id="conn-text">Connecting...</span>
+    </div>
+  </header>
+
+  <!-- Tier 4 Status Bar -->
+  <div style="background: rgba(0, 242, 254, 0.08); border-bottom: 1px solid rgba(0, 242, 254, 0.2); padding: 6px 16px; font-size: 0.72rem; display: flex; align-items: center; justify-content: space-between; color: var(--accent-cyan);">
+    <span>⚡ Tier 4 Channel 1: Smartphone Companion</span>
+    <span style="font-weight: 700; color: #10b981;">● Online</span>
+  </div>
+
+  <!-- Main Mobile Container -->
+  <main class="companion-main">
+
+    <!-- Sound & WakeLock Unlock Banner -->
+    <div id="wakelock-banner" class="permission-banner">
+      <span>🔔 Tap to arm phone siren, vibrations & wake-lock</span>
+      <button id="btn-enable-audio">Enable</button>
+    </div>
+
+    <!-- Dismissable Active Alarm Bar -->
+    <div id="alarm-bar" class="alarm-active-bar">
+      🚨 CRITICAL ALARM! TAP TO DISMISS
+    </div>
+
+    <!-- Tier 4 Multi-Channel Fan-Out Receipt Toast -->
+    <div id="tier4-dispatch-pill" style="display: none; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 0.73rem; color: #34d399; text-align: center; animation: pulse-dot 2s infinite;">
+      ⚡ <strong>Tier 4 Cloud Dispatch Delivered:</strong> Phone ✔ | Telegram ✔ | Twilio ✔ | SMS ✔
+    </div>
+
+    <!-- Hero Driver Safety Status Card -->
+    <div id="hero-card" class="hero-status-card">
+      <div id="hero-icon" class="status-icon-bubble">🛡️</div>
+      <div id="hero-title" class="hero-status-title">DRIVER SAFE</div>
+      <div id="hero-subtitle" class="hero-status-subtitle">
+        System monitoring driver in real-time. Live image capture active.
+      </div>
+    </div>
+
+    <!-- LIVE CAPTURED INCIDENT IMAGE CARD (Visible when alert is triggered) -->
+    <div id="live-snapshot-card" class="card-live-snapshot" style="display: none;">
+      <div class="snapshot-header">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span class="status-dot pulsing" style="background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #f87171; text-transform: uppercase;" id="snap-type-badge">
+            LIVE INCIDENT CAPTURE
+          </span>
+        </div>
+        <span style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;" id="snap-time">--:--:--</span>
+      </div>
+
+      <div class="snapshot-img-wrapper">
+        <img id="incident-live-img" src="" alt="Live Incident Snapshot" />
+        <div class="snapshot-overlay-tag" id="snap-overlay-desc">Distraction Captured</div>
+      </div>
+    </div>
+
+    <!-- Mini Telemetry Row -->
+    <div class="mobile-metrics-row">
+      <div class="mini-stat-card">
+        <div class="mini-stat-label">Safety Index</div>
+        <div class="mini-stat-value" id="stat-score" style="color: var(--accent-emerald);">100</div>
+      </div>
+      <div class="mini-stat-card">
+        <div class="mini-stat-label">Total Yawns</div>
+        <div class="mini-stat-value" id="stat-yawns" style="color: var(--accent-amber);">0</div>
+      </div>
+      <div class="mini-stat-card">
+        <div class="mini-stat-label">Microsleeps</div>
+        <div class="mini-stat-value" id="stat-microsleeps" style="color: var(--accent-crimson);">0</div>
+      </div>
+      <div class="mini-stat-card">
+        <div class="mini-stat-label">Distractions</div>
+        <div class="mini-stat-value" id="stat-distractions" style="color: #f97316;">0</div>
+      </div>
+    </div>
+
+    <!-- Actions & SOS Buttons -->
+    <div class="mobile-actions">
+      <button id="btn-test-buzz" class="btn-mobile btn-mobile-test">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Test Phone Vibration & Siren
+      </button>
+
+      <button id="btn-view-mobile-sms" class="btn-mobile" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399;">
+        💬 View Dispatched SMS Alerts (<span id="mobile-sms-count">0</span>)
+      </button>
+
+      <button id="btn-sos-call" class="btn-mobile btn-mobile-sos">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        EMERGENCY SOS DISPATCH
+      </button>
+
+      <!-- Return Back to Dashboard / Disconnect Button -->
+      <button id="btn-mobile-return" class="btn-mobile btn-mobile-return">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Return Back to Dashboard / Disconnect
+      </button>
+    </div>
+
+    <!-- Mobile SMS Drawer (Collapsible) -->
+    <div id="mobile-sms-drawer" style="display: none; background: rgba(13, 18, 29, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; margin-top: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+        <strong style="font-size: 0.8rem; color: #34d399;">💬 Received SMS Text Alerts</strong>
+        <span style="font-size: 0.7rem; color: #94a3b8; cursor: pointer;" id="btn-close-mobile-sms">Close ×</span>
+      </div>
+      <div id="mobile-sms-list" style="font-size: 0.72rem; color: #e2e8f0; line-height: 1.4; max-height: 180px; overflow-y: auto;">
+        <p style="color: #64748b; text-align: center;">Loading SMS messages...</p>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: auto; padding: 14px 0 24px 0; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+      <p style="font-size: 0.72rem; color: #64748b; line-height: 1.4;">
+        Keep this receiver open on your phone mount during driving.<br />
+        Vibrations, alarms and photos trigger automatically.
+      </p>
+    </div>
+
+  </main>
+
+  <!-- Application Scripts -->
+  <script src="/static/js/audio.js"></script>
+  <script src="/static/js/socket.js"></script>
+  <script src="/static/js/companion.js"></script>
+</body>
+</html>
